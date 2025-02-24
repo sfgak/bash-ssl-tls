@@ -88,17 +88,15 @@ parse_certificates() {
 			opsslcertexpdate=$(echo | openssl s_client -connect "$line" 2>&1 | openssl x509 -noout -enddate -subject -issuer 2>/dev/null)
 		fi
 		if [[ -n "$opsslcertexpdate" ]]; then
-			#echo ""
 			echo "----------------------------------------------------"
-			echo "Certificate Issuer: ${opsslcertexpdate#*issuer=}"
-			#echo $issuer
+			issuer=${opsslcertexpdate#*issuer=}
+			echo "Certificate Issuer: $issuer"
 			subject=$(echo $opsslcertexpdate | grep -oP '(?<=subject=).*(?=issuer)')
 			echo "Certificate Subject: $subject"
 			parse_date "$opsslcertexpdate"
 		fi
 	done < $1
 }
-
 
 parse_certificates ipport.txt
 parse_certificates pem.files
