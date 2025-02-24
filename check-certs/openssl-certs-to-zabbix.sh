@@ -22,7 +22,8 @@ grep --exclude="*.types" -rn .crt /etc/nginx/sites-enabled/* | awk '{print $3}' 
 ###netstat -tulpn | grep -v ::: | grep tcp | awk '{print $4}' | grep -v '0\.0\.0\.0' | grep -v '127\.0\.0\.' > ipport.txt
 netstat -tulpn | grep -v ::: | grep tcp | awk '{print $4}' | grep -v '127\.0\.0\.' > ipport.txt
 
-echo "Local IP address is $localip"
+### Shoe local IP address
+#echo "Local IP address is $localip"
 
 parse_date() {
 	if [[ -n "$1" ]]; then
@@ -69,24 +70,14 @@ parse_date() {
 		esac
 		certexpirydate="$year-$mn-$day"
 		tscertexpirydate=$(date -d "$certexpirydate" +%s)
-		#echo "Certificate in $line valid until $certexpirydate"
-		deltadays=$(((tscertexpirydate - tstoday) / 86400))
-		minusdeltadays=$(((tstoday - tscertexpirydate) / 86400))
-		### Showing dates
-		#if [[ $deltadays -gt 0 ]]; then
-		#	echo "$deltadays days remaining to certificate expiry date"
-		#elif [[ $deltadays -lt 0 ]]; then
-		#	echo "Certificate has expired $minusdeltadays days ago"
-		#fi
-		###
+		#deltadays=$(((tscertexpirydate - tstoday) / 86400))
+		#minusdeltadays=$(((tstoday - tscertexpirydate) / 86400))
 		json=$(jq -n \
 			--arg line "$line" \
 			--arg subject "$subject" \
 			--arg issuer "$issuer" \
 			--arg tscertexpirydate "$tscertexpirydate" \
 			'{line: $line, subject: $subject, issuer: $issuer, tscertexpirydate: $tscertexpirydate}')
-			#--arg issuer "$issuer" \
-			#--arg tscertexpirydate \
 		echo $json
 	fi
 }
@@ -100,11 +91,8 @@ parse_certificates() {
 			opsslcertexpdate=$(echo | openssl s_client -connect "$line" 2>&1 | openssl x509 -noout -enddate -subject -issuer 2>/dev/null)
 		fi
 		if [[ -n "$opsslcertexpdate" ]]; then
-			#echo "----------------------------------------------------"
 			issuer=${opsslcertexpdate#*issuer=}
-			#echo "Certificate Issuer: $issuer"
 			subject=$(echo $opsslcertexpdate | grep -oP '(?<=subject=).*(?=issuer)')
-			#echo "Certificate Subject: $subject"
 			parse_date "$opsslcertexpdate"
 		fi
 	done < $1
