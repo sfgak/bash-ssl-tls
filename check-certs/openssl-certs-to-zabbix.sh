@@ -91,8 +91,10 @@ parse_certificates() {
 			opsslcertexpdate=$(echo | openssl s_client -connect "$line" 2>&1 | openssl x509 -noout -enddate -subject -issuer 2>/dev/null)
 		fi
 		if [[ -n "$opsslcertexpdate" ]]; then
+			line=$(echo $line | sed 's/[[:space:]]*$//')
 			issuer=${opsslcertexpdate#*issuer=}
 			subject=$(echo $opsslcertexpdate | grep -oP '(?<=subject=).*(?=issuer)')
+			subject=$(echo $subject | sed 's/[[:space:]]*$//')
 			parse_date "$opsslcertexpdate"
 		fi
 	done < $1
